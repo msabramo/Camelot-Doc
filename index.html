@@ -1,0 +1,704 @@
+<artifact identifier="camelot-project-postscript" type="text/html" title="The Camelot Project: PostScript Document Processing Technology">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Camelot Project: PostScript Document Processing Technology</title>
+    <style>
+        :root {
+            --bg: #FAFBFC;
+            --surface: #FFFFFF;
+            --text: #1E293B;
+            --muted: #64748B;
+            --accent: #2563EB;
+            --accent2: #7C3AED;
+            --border: #E2E8F0;
+            --onAccent: #FFFFFF;
+            --onAccent2: #FFFFFF;
+            
+            --font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            --font-xs: clamp(12px, 0.7vw, 13px);
+            --font-sm: clamp(14px, 0.8vw, 15px);
+            --font-base: clamp(16px, 1vw, 18px);
+            --font-lg: clamp(20px, 1.4vw, 24px);
+            --font-xl: clamp(26px, 2vw, 34px);
+            
+            --space-1: 8px;
+            --space-2: 12px;
+            --space-3: 16px;
+            --space-4: 24px;
+            --space-5: 32px;
+            --space-6: 48px;
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            
+            --focus-ring: 2px solid var(--accent);
+            --easing: cubic-bezier(.2,.7,.2,1);
+            --duration: 180ms;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-family);
+            font-size: var(--font-base);
+            line-height: 1.6;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--accent);
+            color: var(--onAccent);
+            padding: 8px;
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            z-index: 1000;
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        .site-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: var(--space-4) 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .header-content {
+            max-width: min(1120px, 92vw);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+        }
+
+        .site-header h1 {
+            font-size: var(--font-lg);
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.25;
+            color: var(--text);
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--font-sm);
+            color: var(--muted);
+        }
+
+        .breadcrumbs a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            color: var(--border);
+        }
+
+        .section-progress {
+            display: flex;
+            gap: var(--space-1);
+            align-items: center;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: background var(--duration) var(--easing);
+        }
+
+        .progress-dot.active {
+            background: var(--accent);
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-6);
+            max-width: min(1120px, 92vw);
+            margin: 0 auto;
+            padding: var(--space-6) 0;
+        }
+
+        @media (max-width: 860px) {
+            .shell {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+            
+            .toc {
+                order: -1;
+            }
+        }
+
+        .toc {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            height: fit-content;
+            position: sticky;
+            top: calc(80px + var(--space-4));
+        }
+
+        .toc h2 {
+            font-size: var(--font-base);
+            font-weight: 600;
+            margin: 0 0 var(--space-3) 0;
+            color: var(--text);
+        }
+
+        .toc ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .toc li {
+            margin-bottom: var(--space-2);
+        }
+
+        .toc a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: var(--font-sm);
+            display: block;
+            padding: var(--space-2);
+            border-radius: var(--radius-sm);
+            transition: all var(--duration) var(--easing);
+        }
+
+        .toc a:hover,
+        .toc a[aria-current="true"] {
+            background: var(--accent);
+            color: var(--onAccent);
+        }
+
+        .toc a:focus-visible {
+            outline: var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        main {
+            min-height: 100vh;
+        }
+
+        section {
+            scroll-margin-top: 96px;
+            margin-bottom: calc(var(--space-6) * 1.5);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all var(--duration) var(--easing);
+        }
+
+        section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        section h2 {
+            font-size: var(--font-xl);
+            font-weight: 700;
+            line-height: 1.25;
+            margin: 0 0 var(--space-4) 0;
+            color: var(--text);
+        }
+
+        .section-summary {
+            font-size: var(--font-lg);
+            color: var(--muted);
+            margin-bottom: var(--space-5);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .content-block {
+            margin-bottom: var(--space-4);
+        }
+
+        .content-block p {
+            margin: 0 0 var(--space-4) 0;
+            line-height: 1.6;
+        }
+
+        .callout {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: var(--onAccent);
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            margin: var(--space-5) 0;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .callout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s var(--easing);
+        }
+
+        .callout:hover::before {
+            transform: translateX(100%);
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-5);
+            align-items: start;
+            margin: var(--space-5) 0;
+        }
+
+        @media (max-width: 640px) {
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+        }
+
+        .code-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin: var(--space-4) 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .code-header {
+            background: var(--bg);
+            padding: var(--space-3) var(--space-4);
+            border-bottom: 1px solid var(--border);
+            font-size: var(--font-sm);
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .code-content {
+            position: relative;
+        }
+
+        .code-lines {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: var(--font-sm);
+            line-height: 1.5;
+        }
+
+        .line-numbers {
+            background: var(--bg);
+            padding: var(--space-4) var(--space-3);
+            color: var(--muted);
+            text-align: right;
+            border-right: 1px solid var(--border);
+            user-select: none;
+        }
+
+        .code-text {
+            padding: var(--space-4);
+            overflow-x: auto;
+        }
+
+        .code-line {
+            display: block;
+            min-height: 1.5em;
+        }
+
+        /* PostScript syntax highlighting */
+        .ps-keyword { color: #0969da; font-weight: 600; }
+        .ps-operator { color: #cf222e; }
+        .ps-number { color: #0550ae; }
+        .ps-comment { color: #656d76; font-style: italic; }
+        .ps-string { color: #0a3069; }
+
+        .expandable-section {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin: var(--space-4) 0;
+            overflow: hidden;
+            background: var(--surface);
+        }
+
+        .expandable-trigger {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: var(--space-4);
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: var(--font-base);
+            font-weight: 600;
+            color: var(--text);
+            transition: background var(--duration) var(--easing);
+        }
+
+        .expandable-trigger:hover {
+            background: var(--bg);
+        }
+
+        .expandable-trigger:focus-visible {
+            outline: var(--focus-ring);
+            outline-offset: -2px;
+        }
+
+        .expand-icon {
+            width: 20px;
+            height: 20px;
+            transition: transform var(--duration) var(--easing);
+        }
+
+        .expandable-section.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--duration) var(--easing);
+        }
+
+        .expandable-section.expanded .expandable-content {
+            max-height: 1000px;
+        }
+
+        .expandable-inner {
+            padding: 0 var(--space-4) var(--space-4);
+            border-top: 1px solid var(--border);
+        }
+
+        [contenteditable]:focus-visible {
+            outline: 2px dashed var(--accent);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            section {
+                opacity: 1;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    
+    <header class="site-header" role="banner">
+        <div class="header-content">
+            <h1 data-section-id="title">The Camelot Project: PostScript Document Processing Technology</h1>
+            <div class="header-nav">
+                <nav class="breadcrumbs" aria-label="Breadcrumb">
+                    <a href="#sec-1">Problem</a>
+                    <span class="breadcrumb-separator">→</span>
+                    <a href="#sec-2">Solution</a>
+                    <span class="breadcrumb-separator">→</span>
+                    <a href="#sec-3">Technology</a>
+                    <span class="breadcrumb-separator">→</span>
+                    <a href="#sec-4">Implementation</a>
+                </nav>
+                <div class="section-progress" aria-label="Reading progress">
+                    <div class="progress-dot" data-section="sec-1"></div>
+                    <div class="progress-dot" data-section="sec-2"></div>
+                    <div class="progress-dot" data-section="sec-3"></div>
+                    <div class="progress-dot" data-section="sec-4"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="shell">
+        <aside class="toc" role="navigation" aria-label="Table of contents">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#sec-1">The Communication Challenge</a></li>
+                <li><a href="#sec-2">PostScript Limitations in Modern Systems</a></li>
+                <li><a href="#sec-3">PostScript Rebinding Technology</a></li>
+                <li><a href="#sec-4">IPS File Format and Self-Contained Documents</a></li>
+            </ul>
+        </aside>
+
+        <main id="main" role="main">
+            <section id="sec-1" data-section-id="1">
+                <h2>The Communication Challenge</h2>
+                <div class="section-summary">
+                    Camelot addresses the fundamental problem companies face in communicating visual material effectively across different systems and locations.
+                </div>
+                
+                <div class="content-block">
+                    <p>The Camelot Project tackles a fundamental challenge confronting modern companies: the inability to effectively communicate visual material between different computer applications and systems.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>While most programs can print to various printers, there exists no universal method to communicate and view this printed information across different platforms and locations.</p>
+                </div>
+                
+                <div class="callout">
+                    Companies need a solution that enables seamless visual communication across diverse computing environments and geographic locations.
+                </div>
+            </section>
+
+            <section id="sec-2" data-section-id="2">
+                <h2>PostScript Limitations in Modern Systems</h2>
+                <div class="section-summary">
+                    While Display PostScript provides the correct long-term solution, current limitations require powerful desktop machines and specialized printers, creating barriers to widespread adoption.
+                </div>
+                
+                <div class="content-block">
+                    <p>Display PostScript and PostScript solutions represent the correct long-term approach as machine power increases over time, but they require powerful desktop machines and PostScript printers.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>This solution offers little help for the vast majority of today's users operating with current hardware limitations and standard printing infrastructure.</p>
+                </div>
+                
+                <div class="callout">
+                    The Camelot Project defines technologies and products that bridge the gap between ideal PostScript solutions and today's practical constraints.
+                </div>
+            </section>
+
+            <section id="sec-3" data-section-id="3">
+                <h2>PostScript Rebinding Technology</h2>
+                <div class="section-summary">
+                    The core innovation involves processing PostScript files to generate derivative files with fewer operators while maintaining the same visual effect, demonstrated through polygon drawing examples.
+                </div>
+                
+                <div class="two-column">
+                    <div>
+                        <div class="content-block">
+                            <p>PostScript files can be processed to create derivative files with fewer operators while maintaining identical visual effects through a process called 'rebinding.'</p>
+                        </div>
+                        
+                        <div class="content-block">
+                            <p>The rebinding process transforms complex PostScript procedures into simpler forms that use fewer operators but produce the same net visual effect.</p>
+                        </div>
+                        
+                        <div class="content-block">
+                            <p>This capability leverages an infrequently used feature of the PostScript language to enable more efficient document processing and transmission.</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="code-block">
+                            <div class="code-header">
+                                Original PostScript procedure for drawing a ten-sided polygon using moveto and lineto operators
+                            </div>
+                            <div class="code-content">
+                                <div class="code-lines">
+                                    <div class="line-numbers">
+                                        <div>1</div>
+                                        <div>2</div>
+                                        <div>3</div>
+                                        <div>4</div>
+                                        <div>5</div>
+                                        <div>6</div>
+                                        <div>7</div>
+                                        <div>8</div>
+                                    </div>
+                                    <div class="code-text">
+                                        <div class="code-line"><span class="ps-operator">/</span><span class="ps-keyword">poly</span></div>
+                                        <div class="code-line">  <span class="ps-operator">{</span><span class="ps-number">1</span> <span class="ps-number">0</span> <span class="ps-keyword">moveto</span></div>
+                                        <div class="code-line">   <span class="ps-operator">/</span><span class="ps-keyword">ang</span> <span class="ps-number">36</span> <span class="ps-keyword">def</span></div>
+                                        <div class="code-line">   <span class="ps-number">10</span> <span class="ps-operator">{</span><span class="ps-keyword">ang</span> <span class="ps-keyword">cos</span> <span class="ps-keyword">ang</span> <span class="ps-keyword">sin</span> <span class="ps-keyword">lineto</span></div>
+                                        <div class="code-line">       <span class="ps-operator">/</span><span class="ps-keyword">ang</span> <span class="ps-keyword">ang</span> <span class="ps-number">36</span> <span class="ps-keyword">add</span> <span class="ps-keyword">def</span></div>
+                                        <div class="code-line">      <span class="ps-operator">}</span><span class="ps-keyword">repeat</span></div>
+                                        <div class="code-line">   <span class="ps-operator">}</span><span class="ps-keyword">def</span></div>
+                                        <div class="code-line"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-4" data-section-id="4">
+                <h2>IPS File Format and Self-Contained Documents</h2>
+                <div class="section-summary">
+                    The IPS format creates device-independent, self-contained files that solve font substitution issues and enable electronic archiving of entire libraries with guaranteed printability.
+                </div>
+                
+                <div class="content-block">
+                    <p>The IPS format eliminates complex font substitution schemes by creating self-contained files that include all necessary fonts and resources within the document itself.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>Users can capture any PostScript file from a driver, convert it to IPS format, and ship it anywhere on the network for printing on any PostScript machine.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>Device independence is central to the Camelot Project, ensuring IPS files print correctly on color or black-and-white machines and low or high-resolution devices at various magnifications.</p>
+                </div>
+                
+                <div class="callout">
+                    Entire libraries can be archived electronically with guaranteed printability at any location, revolutionizing document distribution and preservation.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Edit mode support
+        let isEditMode = false;
+
+        // Listen for messages from parent
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'toggle_edit_mode') {
+                isEditMode = event.data.enabled;
+                toggleContentEditable(isEditMode);
+            } else if (event.data.type === 'get_html_content') {
+                // Send current HTML content to parent
+                window.parent.postMessage({
+                    type: 'html_content',
+                    html: document.documentElement.outerHTML
+                }, '*');
+            }
+        });
+
+        // Toggle contenteditable on all elements with data-section-id
+        function toggleContentEditable(enabled) {
+            const editableElements = document.querySelectorAll('[data-section-id]');
+            editableElements.forEach(element => {
+                element.contentEditable = enabled ? 'true' : 'false';
+                if (enabled) {
+                    element.style.outline = '1px dashed #3b82f6';
+                    element.style.outlineOffset = '2px';
+                } else {
+                    element.style.outline = 'none';
+                }
+            });
+        }
+
+        // Handle content changes
+        document.addEventListener('input', function(e) {
+            if (e.target.contentEditable === 'true' && e.target.dataset.sectionId) {
+                window.parent.postMessage({
+                    type: 'content_change',
+                    sectionId: e.target.dataset.sectionId,
+                    content: e.target.textContent,
+                    elementType: e.target.tagName.toLowerCase()
+                }, '*');
+            }
+        });
+
+        // Smooth scroll navigation
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                const href = a.getAttribute('href');
+                if (!href || href === '#') return;
+                const target = document.querySelector(href);
+                if (!target) return;
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Section progress tracking
+        const progressDots = document.querySelectorAll('.progress-dot');
+        const tocLinks = document.querySelectorAll('.toc a');
+        
+        function updateProgress() {
+            const sections = document.querySelectorAll('main section');
+            const scrollPos = window.scrollY + window.innerHeight / 3;
+            
+            let currentSection = null;
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                const sectionTop = rect.top + window.scrollY;
+                if (scrollPos >= sectionTop) {
+                    currentSection = section.id;
+                }
+            });
+            
+            // Update progress dots
+            progressDots.forEach(dot => {
+                const isActive = dot.dataset.section === currentSection;
+                dot.classList.toggle('active', isActive);
+            });
+            
+            // Update TOC
+            tocLinks.forEach(link => {
+                const isActive = link.getAttribute('href') === `#${currentSection}`;
+                link.setAttribute('aria-current', isActive ? 'true' : 'false');
+            });
+        }
+
+        // Intersection Observer for section reveals
+        const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduced) {
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                rootMargin: '-10% 0px -60% 0px',
+                threshold: 0.01
+            });
+
+            document.querySelectorAll('main section').forEach(section => {
+                revealObserver.observe(section);
+            });
+        } else {
+            // Show all sections immediately if reduced motion
+            document.querySelectorAll('main section').forEach(section => {
+                section.classList.add('is-visible');
+            });
+        }
+
+        // Progress tracking
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        updateProgress(); // Initial call
+
+        // Expandable sections (if any are added dynamically)
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('.expandable-trigger')) {
+                const section = e.target.closest('.expandable-section');
+                section.classList.toggle('expanded');
+            }
+        });
+    </script>
+</body>
+</html>
+</artifact>
